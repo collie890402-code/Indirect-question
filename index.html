@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indirect Question Master - 간접의문문 학습 게임</title>
+    <!-- Tailwind CSS CDN 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 커스텀 스타일: Inter 폰트 사용 및 앱 배경 설정 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc; /* 라이트 모드 기본 배경 */
+        }
+        /* 버튼 클릭 피드백 효과 */
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .option-button {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+
+    <!-- 메인 컨테이너 -->
+    <div id="app" class="flex-grow container mx-auto p-4 sm:p-6 lg:p-10 max-w-4xl">
+
+        <!-- 헤더 섹션 -->
+        <header class="text-center py-6 sm:py-8 mb-6 bg-white rounded-xl shadow-lg">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700">
+                ✨ Indirect Question Master
+            </h1>
+            <p class="mt-2 text-md text-gray-600">
+                고등학생을 위한 간접의문문 어순 마스터! 실용적인 영어 학습을 시작하세요.
+            </p>
+        </header>
+
+        <!-- 학습 컨텐츠 영역 -->
+        <main class="space-y-8">
+
+            <!-- 1. 퀴즈 섹션: 올바른 어순 고르기 (주요 학습 활동) -->
+            <section id="quiz-section" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-2 text-blue-600">
+                    1️⃣ 어순 퀴즈: 올바른 절을 골라주세요
+                </h2>
+                
+                <div id="quiz-container">
+                    <!-- 점수 표시 -->
+                    <p id="current-score" class="text-lg font-semibold text-right text-gray-500 mb-4">
+                        정답률: 0/0
+                    </p>
+
+                    <!-- 질문 카드 (빈칸 문장 + Context) -->
+                    <div class="bg-blue-50 p-5 rounded-lg border-l-4 border-blue-500 shadow-inner">
+                        <!-- Context: Original Direct Question -->
+                        <p id="context-direct-question" class="text-md text-gray-600 mb-3">
+                            <!-- 직접 의문문 (Context) -->
+                        </p>
+                        <!-- Main Prompt: Sentence with Blank -->
+                        <p id="sentence-with-blank" class="text-xl sm:text-2xl font-bold text-blue-800">
+                            <!-- 완성할 문장: Do you know [        ]. -->
+                        </p>
+                    </div>
+
+                    <!-- 선택지 컨테이너 -->
+                    <div id="options-container" class="mt-6 space-y-3">
+                        <!-- 선택지 버튼들이 여기에 동적으로 삽입됩니다. -->
+                    </div>
+
+                    <!-- 피드백 메시지 -->
+                    <div id="feedback-message" class="mt-6 p-4 rounded-lg text-center font-semibold transition-all duration-300 hidden">
+                        <!-- 피드백 메시지가 여기에 표시됩니다. -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 작문 연습 섹션: 소셜 미디어 질문 (실용적 작문 과제) -->
+            <section id="writing-section" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-2 text-green-600">
+                    2️⃣ 작문 연습: 셀럽에게 질문하기
+                </h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    아래 상황을 **간접의문문** 형태로 작성해 보세요. (예시: I wonder, I'd like to know 등을 활용)
+                </p>
+
+                <!-- 작문 프롬프트 -->
+                <div id="writing-prompt" class="p-4 bg-yellow-50 rounded-md mb-4 text-yellow-800 font-medium border border-yellow-300">
+                    <!-- 작문 과제가 여기에 표시됩니다. -->
+                </div>
+
+                <label for="user-answer" class="block text-sm font-medium text-gray-700 mb-2">
+                    나의 간접의문문 (문장의 끝은 마침표 '.'로):
+                </label>
+                <textarea id="user-answer" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900" placeholder="예: I wonder when she will release the album."></textarea>
+                
+                <button id="check-writing-btn" class="mt-4 w-full py-2 px-4 rounded-lg shadow-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
+                    작문 확인하기 & 다음 과제
+                </button>
+                
+                <!-- 작문 피드백 -->
+                <div id="writing-feedback" class="mt-4 p-4 rounded-lg text-sm text-gray-800 bg-gray-100 hidden">
+                    <!-- 작문 피드백이 여기에 표시됩니다. -->
+                </div>
+            </section>
+            
+            <!-- 3. 시뮬레이션 대화: 식당 예약 확인하기 (실용적 맥락 이해) -->
+            <section id="dialogue-section" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-2 text-purple-600">
+                    3️⃣ 실용 대화: 식당 예약 시뮬레이션
+                </h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    식당 예약 상황에서 간접의문문이 어떻게 사용되는지 살펴보며 실용적인 감각을 익히세요.
+                </p>
+
+                <div class="space-y-4 max-w-lg mx-auto">
+                    <!-- Dialogue 1 -->
+                    <div class="flex justify-start">
+                        <div class="bg-blue-100 p-3 rounded-xl rounded-bl-sm max-w-[80%] text-sm shadow-md">
+                            **Customer:** Hello, I'd like to confirm my reservation. Could you tell me **what my reservation name is**?
+                        </div>
+                    </div>
+                    <!-- Dialogue 2 -->
+                    <div class="flex justify-end">
+                        <div class="bg-gray-200 p-3 rounded-xl rounded-br-sm max-w-[80%] text-sm shadow-md">
+                            **Restaurant:** Certainly. Your name is John Doe. May I ask **if you are aware of our new closing time**?
+                        </div>
+                    </div>
+                    <!-- Dialogue 3 -->
+                    <div class="flex justify-start">
+                        <div class="bg-blue-100 p-3 rounded-xl rounded-bl-sm max-w-[80%] text-sm shadow-md">
+                            **Customer:** Oh, I wasn't. I also wanted to check **how many people we can bring in total**.
+                        </div>
+                    </div>
+                    <!-- Dialogue 4 -->
+                    <div class="flex justify-end">
+                        <div class="bg-gray-200 p-3 rounded-xl rounded-br-sm max-w-[80%] text-sm shadow-md">
+                            **Restaurant:** Your party limit is four. Please confirm **what time you expect to arrive**.
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-6 text-sm text-center text-purple-600 font-medium">
+                    👉 **학습 Tip:** 굵은 글씨의 간접의문문들은 모두 '주어 + 동사'의 어순을 지키고 있습니다.
+                </p>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- JavaScript 로직 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // =================================================================
+            // 1. 상태 및 데이터 정의
+            // =================================================================
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let totalQuestionsAnswered = 0;
+            let currentWritingPromptIndex = 0;
+            let isAnswerLocked = false; // 오답 시 재클릭 방지
+
+            // 간접의문문 학습을 위한 퀴즈 데이터 (1번 섹션)
+            // 형식: [직접 의문문, 유도 문구 (앞 문장), 정답 선택지 (절), 오답 1 (절), 오답 2 (절), 힌트]
+            const quizData = [
+                [
+                    "Where does he live?",
+                    "Do you know", // 유도 문구 (앞 문장)
+                    "where he lives.", 
+                    "where does he live.", 
+                    "does he live where.", 
+                    "간접의문문은 '의문사 + 주어 + 동사' 어순을 따르며, 조동사 'do/does/did'는 사용하지 않습니다."
+                ],
+                [
+                    "When will they arrive?",
+                    "I wonder",
+                    "when they will arrive.",
+                    "when will they arrive.", 
+                    "will they arrive when.", 
+                    "'will'은 조동사이지만, 간접의문문에서는 주어 뒤에 위치합니다. (주어 + will + 동사원형)"
+                ],
+                [
+                    "Is the meeting postponed?",
+                    "Could you tell me",
+                    "if the meeting is postponed.", 
+                    "if is the meeting postponed.", 
+                    "the meeting is postponed if.", 
+                    "Yes/No 질문일 때는 'if'나 'whether'를 사용하고, 그 뒤에 '주어 + 동사' 어순을 씁니다."
+                ],
+                [
+                    "Who broke the window?",
+                    "She asked",
+                    "who broke the window.",
+                    "who did break the window.", 
+                    "did who break the window.", 
+                    "Who가 주어 역할을 할 때는 어순 변화 없이 그대로 씁니다. (Who + 동사)"
+                ],
+                [
+                    "What time did you wake up?",
+                    "I forgot",
+                    "what time you woke up.",
+                    "what time did you wake up.", 
+                    "did you wake up what time.", 
+                    "과거시제 조동사 'did'는 생략하고, 본동사(wake)를 과거형(woke)으로 바꿔 주어야 합니다."
+                ]
+            ];
+            
+            // 실용적 작문 연습 과제 (2번 섹션)
+            // alternativeExample은 구조는 유지하되 내용이 약간 다른 예시를 제공합니다.
+            const writingPrompts = [
+                {
+                    prompt: "소셜 미디어에서 좋아하는 가수에게 '다음 앨범은 언제 나올지' 질문하고 싶어요.",
+                    alternativeExample: "I wonder if your new single will be out next month." // if/주어+동사 구조 유지, 내용 변경
+                },
+                {
+                    prompt: "배우의 라이브 방송에서 '그 영화를 촬영하면서 가장 어려웠던 점이 무엇인지' 궁금하다고 말하고 싶어요.",
+                    alternativeExample: "Could you tell me what inspired you the most during the project?" // 의문사+동사 구조 유지, 내용 변경
+                },
+                {
+                    prompt: "인플루언서에게 '당신이 가장 좋아하는 책이 무엇인지' 알려달라고 요청하고 싶어요.",
+                    alternativeExample: "I would love to know what genres you read the most." // 의문사+주어+동사 구조 유지, 내용 변경
+                }
+            ];
+
+            // DOM 요소 선택
+            const contextDirectQuestionEl = document.getElementById('context-direct-question');
+            const sentenceWithBlankEl = document.getElementById('sentence-with-blank');
+            const optionsContainer = document.getElementById('options-container');
+            const feedbackMessageEl = document.getElementById('feedback-message');
+            const currentScoreEl = document.getElementById('current-score');
+            const writingPromptEl = document.getElementById('writing-prompt');
+            const userAnsTextArea = document.getElementById('user-answer');
+            const checkWritingBtn = document.getElementById('check-writing-btn');
+            const writingFeedbackEl = document.getElementById('writing-feedback');
+
+            // =================================================================
+            // 2. 퀴즈 로직 함수
+            // =================================================================
+
+            /** 배열의 요소 순서를 무작위로 섞는 함수 */
+            const shuffleArray = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            };
+
+            /** 현재 인덱스의 퀴즈를 로드하고 화면에 표시합니다. */
+            const loadQuestion = () => {
+                if (currentQuestionIndex >= quizData.length) {
+                    displayFeedback(`🎉 퀴즈 마스터! 모든 퀴즈 완료. 최종 정답률: ${score}/${totalQuestionsAnswered}`, 'bg-green-100 text-green-700 border-green-500', false);
+                    optionsContainer.innerHTML = `<p class="text-xl text-center text-gray-600 mt-4">수고하셨습니다. 화면을 새로고침하여 다시 도전하세요.</p>`;
+                    return;
+                }
+
+                isAnswerLocked = false;
+                feedbackMessageEl.classList.add('hidden');
+                optionsContainer.innerHTML = '';
+
+                const [directQ, introPhrase, correctAns, wrongAns1, wrongAns2] = quizData[currentQuestionIndex];
+                
+                // 1. Context: Original Direct Question
+                contextDirectQuestionEl.innerHTML = `**직접 의문문 (Context):** "${directQ}"`;
+                
+                // 2. New Prompt: Sentence with Blank (Emphasizing the clause role)
+                sentenceWithBlankEl.innerHTML = `${introPhrase} <span class="text-red-500">[        ]</span>. <span class="text-base text-gray-700 font-normal block mt-2">빈칸에 들어갈 올바른 '간접 의문문 절'을 고르세요.</span>`;
+
+
+                const options = [correctAns, wrongAns1, wrongAns2];
+                shuffleArray(options);
+
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    // 옵션 내용은 간접 의문문 '절' 자체 (ex: where he lives.)
+                    button.textContent = option; 
+                    button.className = 'option-button w-full py-3 px-4 text-left border border-gray-300 rounded-lg shadow-sm text-md font-medium text-gray-800 bg-white hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500';
+                    button.addEventListener('click', () => checkAnswer(button, option, correctAns));
+                    optionsContainer.appendChild(button);
+                });
+            };
+
+            /**
+             * 사용자의 답변을 확인하고 피드백을 제공합니다. (요구사항: 오답인 경우 힌트만 제공하고 학습자가 문장을 수정하도록 함)
+             */
+            const checkAnswer = (button, selectedAnswer, correctAnswer) => {
+                if (isAnswerLocked) return;
+
+                // 정답 여부와 관계없이 시도 횟수 증가
+                totalQuestionsAnswered++;
+                currentScoreEl.textContent = `정답률: ${score}/${totalQuestionsAnswered}`;
+
+                // 모든 버튼을 비활성화
+                Array.from(optionsContainer.children).forEach(btn => btn.disabled = true);
+
+                if (selectedAnswer === correctAnswer) {
+                    score++;
+                    button.classList.remove('bg-white', 'hover:bg-blue-100');
+                    button.classList.add('bg-green-500', 'hover:bg-green-600', 'text-white', 'shadow-xl');
+                    
+                    currentScoreEl.textContent = `정답률: ${score}/${totalQuestionsAnswered}`;
+                    displayFeedback('✅ 정답입니다! 다음 문제로 넘어갑니다.', 'bg-green-100 text-green-700 border-green-500');
+                    
+                    // 잠시 후 다음 문제 로드
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        loadQuestion();
+                    }, 1500);
+
+                } else {
+                    // 오답: 힌트 제공 후 재도전 유도 (여기서는 힌트 제공 후 문제를 초기화하여 학습자가 재시도하게 함)
+                    isAnswerLocked = true; // 재클릭 방지
+
+                    button.classList.remove('bg-white', 'hover:bg-blue-100');
+                    button.classList.add('bg-red-500', 'text-white');
+
+                    // 힌트 제공
+                    const hint = quizData[currentQuestionIndex][5];
+                    displayFeedback(`❌ 오답입니다. 힌트: ${hint}`, 'bg-red-100 text-red-700 border-red-500', 3000);
+
+                    // 잠시 후 퀴즈 재로드 (버튼 재활성화 및 스타일 초기화)
+                    setTimeout(() => {
+                        loadQuestion();
+                    }, 3000);
+                }
+            };
+
+            /**
+             * 피드백 메시지를 표시하고 일정 시간 후 숨깁니다.
+             * @param {string} message - 표시할 메시지
+             * @param {string} classes - Tailwind CSS 배경 및 텍스트 클래스
+             * @param {number} duration - 메시지를 표시할 시간 (ms), 0이면 숨기지 않음
+             */
+            const displayFeedback = (message, classes, duration = 1500) => {
+                feedbackMessageEl.innerHTML = `<span class="border-b-2 ${classes.split(' ')[1].replace('text-', 'border-')} pb-1">${message}</span>`;
+                // 이전 클래스를 모두 제거하고 새로운 클래스 적용
+                feedbackMessageEl.className = `mt-6 p-4 rounded-lg text-center font-semibold transition-all duration-300 border ${classes}`;
+                feedbackMessageEl.classList.remove('hidden');
+
+                if (duration > 0) {
+                    setTimeout(() => {
+                        feedbackMessageEl.classList.add('hidden');
+                    }, duration);
+                }
+            };
+
+            // =================================================================
+            // 3. 작문 연습 로직 함수
+            // =================================================================
+
+            /** 현재 인덱스의 작문 과제를 로드합니다. */
+            const loadWritingPrompt = () => {
+                userAnsTextArea.value = '';
+                writingFeedbackEl.classList.add('hidden');
+
+                if (currentWritingPromptIndex >= writingPrompts.length) {
+                    writingPromptEl.textContent = "✅ 모든 작문 과제를 완료했습니다!";
+                    userAnsTextArea.disabled = true;
+                    checkWritingBtn.disabled = true;
+                    checkWritingBtn.textContent = '완료';
+                    checkWritingBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    return;
+                }
+
+                writingPromptEl.textContent = writingPrompts[currentWritingPromptIndex].prompt;
+                checkWritingBtn.textContent = '작문 확인하기 & 다음 과제';
+                userAnsTextArea.disabled = false;
+                checkWritingBtn.disabled = false;
+            };
+
+            /** 작문 확인 버튼 클릭 이벤트 핸들러. */
+            checkWritingBtn.addEventListener('click', () => {
+                const userAnswer = userAnsTextArea.value.trim();
+                const currentPrompt = writingPrompts[currentWritingPromptIndex];
+
+                if (userAnswer.length < 10) {
+                    writingFeedbackEl.innerHTML = '⚠️ 문장을 충분히 길게 작성해 주세요.';
+                    writingFeedbackEl.className = 'mt-4 p-4 rounded-lg text-sm bg-red-100 text-red-700 border border-red-300';
+                    writingFeedbackEl.classList.remove('hidden');
+                    return;
+                }
+
+                // 피드백 구성
+                let feedbackText = `<p class="font-bold">📝 나의 작문: ${userAnswer}</p><br>`;
+                
+                // 간접의문문의 핵심 어순(주어+동사) 규칙을 강조하는 피드백 제공
+                const isProperlyPunctuated = userAnswer.endsWith('.');
+                const hasIntroPhrase = userAnswer.toLowerCase().includes('i wonder') || 
+                                       userAnswer.toLowerCase().includes('i\'d like to know') ||
+                                       userAnswer.toLowerCase().includes('can you tell me') ||
+                                       userAnswer.toLowerCase().includes('i would love to know') ||
+                                       userAnswer.toLowerCase().includes('could you tell me');
+
+                if (isProperlyPunctuated && hasIntroPhrase) {
+                    feedbackText += '<p class="text-green-700 font-bold">👍 훌륭합니다! 유도 문구와 마침표를 잘 사용했습니다.</p>';
+                    feedbackText += '<p class="mt-2">이제 문장 중간의 **"의문사 + 주어 + 동사"** 어순을 확인해 보세요. 조동사(do/does/did)가 있다면 제거하고 본동사 시제를 맞추는 것도 중요합니다.</p>';
+                    writingFeedbackEl.className = 'mt-4 p-4 rounded-lg text-sm bg-green-100 text-gray-800 border border-green-300';
+
+                } else {
+                    feedbackText += '<p class="text-red-700 font-bold">💡 수정 필요: 간접의문문은 문장의 일부이므로, 일반적으로 마침표(.)로 끝납니다.</p>';
+                    feedbackText += '<p class="mt-2">또한, "I wonder, I\'d like to know" 같은 유도 문구를 사용했는지 확인해 보세요.</p>';
+                    writingFeedbackEl.className = 'mt-4 p-4 rounded-lg text-sm bg-yellow-100 text-gray-800 border border-yellow-300';
+                }
+
+                // 문제의 정답 대신, 구조는 같지만 내용이 다른 대체 예시를 제공
+                feedbackText += `<br><p class="font-bold text-blue-600">⭐ 참고할 만한 다른 올바른 예시: ${currentPrompt.alternativeExample}</p>`;
+                
+                writingFeedbackEl.innerHTML = feedbackText;
+                writingFeedbackEl.classList.remove('hidden');
+
+                // 다음 문제로 이동
+                currentWritingPromptIndex++;
+                setTimeout(loadWritingPrompt, 4000); // 4초 후 다음 과제 로드
+            });
+
+            // =================================================================
+            // 4. 초기화 및 실행
+            // =================================================================
+            loadQuestion();
+            loadWritingPrompt();
+
+        });
+    </script>
+</body>
+</html>
